@@ -196,10 +196,42 @@ table > tbody > tr > td {
     color: white;
     text-decoration: none;
     transition: all 0.2s;
+    cursor: pointer;
 }
 
 #defaultLayout aside > a:hover {
     background-color: #009539;
+    cursor: pointer;
+}
+
+#defaultLayout aside > .dropdown{
+    display: block;
+    width: 100%;
+    text-align: left;
+    padding: 0.75rem 1rem;
+    border-radius: 6px;
+    color: white;
+    text-decoration: none;
+    transition: all 0.2s;
+    cursor: pointer;
+}
+
+#defaultLayout aside > .submenu > .indropdown{
+    display: block;
+    padding: 0.75rem 1rem;
+    color: white;
+    text-decoration: none;
+    transition: all 0.2s;
+    background-color: #333333;
+}
+
+#defaultLayout aside > .dropdown:hover {
+    background-color: #009539;
+    border-radius: 6px;
+}
+
+#defaultLayout aside > .submenu > .indropdown:hover{
+   background-color: #009539;
 }
 
 #defaultLayout .content {

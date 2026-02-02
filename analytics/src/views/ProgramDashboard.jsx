@@ -2,26 +2,13 @@ import Plotly from 'react-plotly.js';
 import MainCard from '../components/MainCard.jsx';
 import SecCard from '../components/SecCard.jsx';
 
-export default function Dashboard() {
+export default function ProgramDashboard() {
   return (
     <div className='grid grid-cols-1 sm:grid-cols-12 gap-2'>
       <MainCard number="37" title="Total Programs"/>
       <SecCard number="20" percent="12%" title="Completed Programs"/>
       <SecCard number="10" percent="8%" title="Ongoing Programs"/>
       <SecCard number="7" percent="5%" title="Upcoming Programs"/>
-
-      {/* <div className='bg-white/50 backdrop-blur-sm h-32 rounded-lg inset-shadow-xs shadow-sm p-3 col-span-3'>
-        <div className='grid grid-cols-2 h-full'>
-          <div className='bg-green-500/50 col-span-1 rounded-lg h-12 w-16'></div>
-          <div className='col-span-1 pt-8'>
-            <p className='text-5xl font-sans text-right font-[650] pr-4'>37</p>
-            <p className='text-right font-sans text-sm pr-4'>New Users</p>
-          </div>
-        </div>
-      </div> */}
-
-      {/* <div className='bg-white/50 backdrop-blur-sm h-32 rounded-lg inset-shadow-xs shadow-sm p-6 col-span-3'></div>
-      <div className='bg-white/50 backdrop-blur-sm h-32 rounded-lg inset-shadow-xs shadow-sm p-6 col-span-3'></div> */}
       
       <div className='col-span-5'>
         <div className='bg-white flex flex-wrap h-96 rounded-[1vw] inset-shadow-xl shadow-xl'>
@@ -47,9 +34,24 @@ export default function Dashboard() {
                 config = {{responsive: true, displaylogo: false}}/> 
           </div>
 
-          <div className='grid grid-cols-2'>
-            <div className='bg-white inset-shadow-lg rounded-lg shadow-xl p-16 mt-2 mr-1'>Sample</div>
-            <div className='bg-white inset-shadow-lg rounded-lg shadow-xl p-16 mt-2 ml-1'>Sample</div>
+          <div className='grid grid-cols-5'>
+            <div className='bg-white inset-shadow-lg rounded-lg shadow-xl mt-2 mr-1 pt-4 pl-4 col-span-3'>
+              <div className='grid grid-cols-3 h-full'>
+                <div className='bg-green-500/50 col-span-1 rounded-lg h-12 w-16'></div>
+                <div className='col-span-2 gap-y-0 pt-16'>
+                  <p className='text-xl font-sans text-right font-[650] pr-4 align-bottom'>₱23,857,097,980.95</p>
+                  <p className='text-right font-sans text-xs font-medium pr-4 align-top'>Total Approved Program Budget</p>
+                </div>
+              </div>
+            </div>
+            
+            <div className='bg-white inset-shadow-lg rounded-lg shadow-xl h-37 pt-4 pl-4 mt-2 ml-1 col-span-2'>
+                <div className='bg-green-500/50 rounded-lg h-12 w-16'></div>
+                <div className='pt-2'>
+                  <p className='text-base font-sans text-right font-[650] pr-4 align-bottom'>₱23,857,097,980.95</p>
+                  <p className='text-right font-sans text-xs font-medium pr-4 align-top'>Total Approved Program Budget</p>
+                </div>
+            </div>
           </div>
       </div>
       
@@ -58,6 +60,7 @@ export default function Dashboard() {
             <div className=' bg-gray-200 text-xl w-full h-12 rounded-t-[1vw] align-middle pt-2 pl-4'>Dashboard</div>
             <Plotly 
                 data={[
+                  {type: 'bar', width: 0.4, x: ['Type 1', 'Type 2', 'Type 3'], y: [2, 5, 3]},
                   {
                     x: ['Type 1', 'Type 2', 'Type 3'],
                     y: [2, 6, 3],
@@ -65,12 +68,11 @@ export default function Dashboard() {
                     mode: 'lines+markers',
                     marker: {color: 'red'},
                   },
-                  {type: 'bar', x: ['Type 1', 'Type 2', 'Type 3'], y: [2, 5, 3]},
                   ]}
-                  layout={ {width: 600, height: 140, title: {text: 'A Fancy Plot'}, 
+                  layout={ {width: 600, height: 160, barcornerradius: 10,
                     plot_bgcolor: 'rgba(0,0,0,0)', paper_bgcolor: 'rgba(0,0,0,0)', margin: {l: 50, r: 0, b: 0, t: 25, pad: 4
                   }} }
-                  config = {{responsive: true}}
+                  config = {{responsive: true, displaylogo: false}}
             />
           </div>
 
