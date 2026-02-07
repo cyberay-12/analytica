@@ -1,18 +1,32 @@
 import {Link, Navigate, Outlet} from 'react-router-dom';
 import {useStateContext} from '../contexts/ContextProvider.jsx';
 import logo from '../assets/images/analytica logo.png';
-import {useState} from 'react';
+import {useEffect, useState} from 'react';
+import axiosClient from '../axios-client.js';
 
 export default function DefaultLayout() {
-  const {user, token} = useStateContext();
+  const {user, token, setUser, setToken} = useStateContext();
 
   if (!token) {
     return <Navigate to="/login" />;
   }
 
   const onLogout = (e) => {
-    e.preventDefault();
+    e.preventDefault()
+
+    axiosClient.post('/logout')
+    .then(() => {
+      setUser({});
+      setToken(null);
+    })
   }
+
+  useEffect(() => {
+    axiosClient.get('/user')
+    .then(({data}) => {
+      setUser(data);
+    })
+  }, []);
 
   const [toggleRadiis, setToggleRadiis] = useState(false);
 
