@@ -1,22 +1,49 @@
+import { useEffect, useState } from "react";
+import { useStateContext } from "../contexts/ContextProvider";
+import axiosClient from "../axios-client";
 import Plotly from 'react-plotly.js';
 import MainCard from '../components/MainCard.jsx';
 import SecCard from '../components/SecCard.jsx';
 
 export default function ProgramDashboard() {
+  const [data, setData] = useState([]);
+  const [loading, setLoading] = useState(false);
+
+  useEffect(() => {
+    getData();
+  }, [])
+
+  const getData = () => {
+    setLoading(true);
+    axiosClient.get('/rdprogram')
+    .then(({data}) => {
+      setLoading(false);
+      setData(data);
+      console.log(data);
+    })
+    .catch(() => {
+      setLoading(false);
+    })
+  }
+
   return (
     <div>
+      {loading ? (
+        <p>Loading Dashboard...</p>
+      ) : (
+      <>
       <div className="grid grid-cols-3 sm:grid-cols-6 md:grid-cols-12 gap-3 mb-2">
         <div className='col-span-3'>
-          <MainCard number="43" title="Total Programs" />
+          <MainCard number={data?.stats?.total_programs} title="Total Programs" />
         </div>
         <div className='col-span-3'>
-          <SecCard number="20" percent="12%" title="Completed Programs"/>
+          <SecCard number={data?.stats?.completed_programs} percent={data?.percentages?.complete_perc} title="Completed Programs"/>
         </div>
         <div className='col-span-3'>
-          <SecCard number="10" percent="8%" title="Ongoing Programs"/>
+          <SecCard number={data?.stats?.ongoing_programs} percent={data?.percentages?.ongoing_perc} title="Ongoing Programs"/>
         </div>
         <div className='col-span-3'>
-          <SecCard number="7" percent="5%" title="Upcoming Programs"/>
+          <SecCard number={data?.stats?.new_programs} percent={data?.percentages?.year_percent} title={`New Programs in ${data?.stats?.max_year}`}/>
         </div>
       </div>
       
@@ -29,12 +56,12 @@ export default function ProgramDashboard() {
                 <Plotly 
                   data={[
                   {
-                    values: [20, 22, 24, 34],
-                    labels: ['Type1', 'Type2', 'Type3', 'Type4'],
+                    values: data?.charts?.type_counts,
+                    labels: data?.charts?.type_labels,
                     hoverinfo: 'label+value+percent',
                     hole: .6,
                     type: 'pie',
-                    marker: {colors: ['#00702B', '#F2EA00', '#FF8053', '#4E98FF']}
+                    marker: {colors: ['#00702B', '#F2EA00']}
 
                   },]} 
                   layout={
@@ -74,15 +101,27 @@ export default function ProgramDashboard() {
           <div className='pr-16'>
             <Plotly 
               data={[
-                {type: 'bar', width: 0.4, x: ['Type 1', 'Type 2', 'Type 3'], y: [2, 5, 3]},
-                {x: ['Type 1', 'Type 2', 'Type 3'],
-                  y: [2, 6, 3],
+                {
+                  type: 'bar', 
+                  width: 0.4, 
+                  x: data?.charts?.year_labels?.map(String), 
+                  y: data?.charts?.year_counts,
+                  text: data?.charts?.year_counts?.map(String), 
+                  textposition: 'auto', // Automatically puts it inside or above the bar
+                  width: 0.4,
+                },
+                {
+                  x: data?.charts?.year_labels?.map(String),
+                  y: data?.charts?.year_counts,
                   type: 'scatter',
                   mode: 'lines+markers',
                   marker: {color: 'green'},
+                  text: data?.charts?.year_counts?.map(String), 
+                  textposition: 'auto', // Automatically puts it inside or above the bar
+                  width: 0.4,
                 },]}
-              layout={{height: 200, barcornerradius: 10, plot_bgcolor: 'rgba(0,0,0,0)', paper_bgcolor: 'rgba(0,0,0,0)', 
-                margin: {l: 50, r: 0, b: 0, t: 25, pad: 4
+              layout={{height: 190, barcornerradius: 10, plot_bgcolor: 'rgba(0,0,0,0)', paper_bgcolor: 'rgba(0,0,0,0)', 
+                margin: {l: 50, r: 0, b: 20, t: 10, pad: 1
                 }}}
               useResizeHandler={true}
               style={{width: "100%", height: "100%"}}
@@ -138,6 +177,8 @@ export default function ProgramDashboard() {
         </div>
       </div>
     </div>
+    </>
+    )}
     </div>
     
   );
