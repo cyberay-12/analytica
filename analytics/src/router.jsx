@@ -9,6 +9,8 @@ import GuestLayout from './components/GuestLayout.jsx';
 import ProgramDashboard from './views/ProgramDashboard.jsx';
 import ProjectDashboard from './views/ProjectDashboard.jsx';
 import UserForm from './views/UserForm.jsx';
+import StudiesDashboard from './views/StudiesDashboard.jsx';
+import PublicationDashboard from './views/PublicationDashboard.jsx';
 
 const router = createBrowserRouter([
   {
@@ -26,6 +28,14 @@ const router = createBrowserRouter([
         {
           path: "/rdsproject",
           element: <ProjectDashboard />,
+        },
+        {
+          path: "/rdsstudies",
+          element: <StudiesDashboard />,
+        },
+        {
+          path: "/rdspublication",
+          element: <PublicationDashboard />,
         },
         {
             path: "/users",

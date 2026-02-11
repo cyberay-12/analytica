@@ -39,8 +39,10 @@ export default function DefaultLayout() {
         </button>
         {toggleRadiis && (
         <div className="submenu">
-          <Link className="indropdown" to="/rdsprogram">RADIIS Programs</Link>
-          <Link className="indropdown" to="/rdsproject">RADIIS Projects</Link>
+          <Link className="indropdown" to="/rdsprogram">Programs</Link>
+          <Link className="indropdown" to="/rdsproject">Projects</Link>
+          <Link className="indropdown" to="/rdsstudies">Studies</Link>
+          <Link className="indropdown" to="/rdspublication">Publications</Link>
         </div>
         )}
         <Link to="/users">Users</Link>
