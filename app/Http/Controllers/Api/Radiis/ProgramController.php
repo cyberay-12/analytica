@@ -4,9 +4,6 @@ namespace App\Http\Controllers\Api\Radiis;
 
 use App\Http\Controllers\Controller;
 use App\Models\RDProgram;
-// use App\Http\Requests\StoreRDProgramRequest;
-// use App\Http\Requests\UpdateRDProgramRequest;
-// use App\Http\Resources\Radiis\ProgramResource;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Http\Request;
 
@@ -38,14 +35,14 @@ class ProgramController extends Controller
         $per_year = RDProgram::select('syear', DB::raw('count(*) as total'))
         ->groupBy('syear')
         ->orderBy('syear', 'desc')
-        ->take(5)
+        ->take(7)
         ->get()
         ->reverse();
         //-----------------------------------------------------
         $per_budget = RDProgram::select('syear', DB::raw('sum(budget) as total'))
         ->groupBy('syear')
         ->orderBy('syear', 'desc')
-        ->take(5)
+        ->take(7)
         ->get()
         ->reverse();
 
@@ -53,12 +50,12 @@ class ProgramController extends Controller
         ->where('type', 'Research')
         ->groupBy('syear')
         ->orderBy('syear', 'desc')
-        ->take(5)
+        ->take(7)
         ->get()
         ->reverse()
         ->keyBy('syear');
 
-        $budget_research = collect(range($permMaxYear - 4, $permMaxYear))
+        $budget_research = collect(range($permMaxYear - 6, $permMaxYear))
             ->map(function ($year) use ($budget_res) {
             return [
                 'syear' => $year,
@@ -71,12 +68,12 @@ class ProgramController extends Controller
         ->where('type', 'Development')
         ->groupBy('syear')
         ->orderBy('syear', 'desc')
-        ->take(5)
+        ->take(7)
         ->get()
         ->reverse()
         ->keyBy('syear');;
 
-        $budget_develop = collect(range($permMaxYear - 4, $permMaxYear))
+        $budget_develop = collect(range($permMaxYear - 6, $permMaxYear))
             ->map(function ($year) use ($budget_dev) {
             return [
                 'syear' => $year,
@@ -111,7 +108,7 @@ class ProgramController extends Controller
                 'completed_programs' => $filteredData->where('status', 'Completed')->count(),
                 'ongoing_programs'   => $filteredData->where('status', 'Ongoing')->count(),
                 'new_programs'   => $filteredData->where('syear', $maxYear)->count(),
-                'total_budget' => $filteredData->where('syear','<', $maxYear)->sum('budget'),
+                'total_budget' => RDProgram::where('syear','<=', $maxYear)->sum('budget'),
                 'new_budget' => $filteredData->where('syear', $maxYear)->sum('budget'),
                 'max_year' => $filteredData->max('syear'),
                 'prev_year' => $secondYear,

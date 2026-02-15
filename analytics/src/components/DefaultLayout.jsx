@@ -43,6 +43,10 @@ export default function DefaultLayout() {
           <Link className="indropdown" to="/rdsproject">Projects</Link>
           <Link className="indropdown" to="/rdsstudies">Studies</Link>
           <Link className="indropdown" to="/rdspublication">Publications</Link>
+          <Link className="indropdown" to="/rdspresentation">Presentations</Link>
+          <Link className="indropdown" to="/rdsiprights">IPRs</Link>
+          <Link className="indropdown" to="/rdsaward">Awards</Link>
+          <Link className="indropdown" to="/rdslinkage">Linkages</Link>
         </div>
         )}
         <Link to="/users">Users</Link>

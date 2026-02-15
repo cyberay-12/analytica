@@ -3,6 +3,9 @@ import axiosClient from "../axios-client";
 import Plotly from 'react-plotly.js';
 import MainCard from '../components/MainCard.jsx';
 import SecCard from '../components/SecCard.jsx';
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faCalendarCheck, faCalendarMinus, faCalendarPlus } from "@fortawesome/free-regular-svg-icons";
+import { faChartGantt, faMoneyBills, faMoneyBill } from "@fortawesome/free-solid-svg-icons";
 
 export default function ProjectDashboard() {
   const [data, setData] = useState([]);
@@ -63,16 +66,16 @@ export default function ProjectDashboard() {
     <div className="px-6 pt-4">
       <div className="grid grid-cols-3 sm:grid-cols-6 md:grid-cols-12 gap-3 mb-2">
         <div className='col-span-3'>
-          <MainCard number={data?.stats?.total_projects} title="Total Projects" />
+          <MainCard icon={<FontAwesomeIcon className="text-green-600 text-3xl" icon={faChartGantt} />} number={data?.stats?.total_projects} title="Total Projects" />
         </div>
         <div className='col-span-3'>
-          <SecCard number={data?.stats?.completed_projects} percent={<span>{data?.percentages?.complete_perc}%</span>} title="Completed Projects"/>
+          <SecCard icon={<FontAwesomeIcon className="text-white text-3xl" icon={faCalendarCheck} />} number={data?.stats?.completed_projects} percent={<span>{data?.percentages?.complete_perc}%</span>} title="Completed Projects"/>
         </div>
         <div className='col-span-3'>
-          <SecCard number={data?.stats?.ongoing_projects} percent={<span>{data?.percentages?.ongoing_perc}%</span>} title="Ongoing Projects"/>
+          <SecCard icon={<FontAwesomeIcon className="text-white text-3xl" icon={faCalendarMinus} />} number={data?.stats?.ongoing_projects} percent={<span>{data?.percentages?.ongoing_perc}%</span>} title="Ongoing Projects"/>
         </div>
         <div className='col-span-3'>
-          <SecCard number={data?.stats?.new_projects} percent={<span className={data?.percentages?.year_percent > 0 ? 'text-green-600' : 'text-red-600'}>
+          <SecCard icon={<FontAwesomeIcon className="text-white text-3xl" icon={faCalendarPlus} />} number={data?.stats?.new_projects} percent={<span className={data?.percentages?.year_percent > 0 ? 'text-green-600' : 'text-red-600'}>
             {data?.percentages?.year_percent > 0 ? '▲' : '▼'} {data?.percentages?.year_percent}%
             </span>} title={`New Projects in ${data?.stats?.max_year}`}/>
         </div>
@@ -80,7 +83,7 @@ export default function ProjectDashboard() {
       
     <div className='grid grid-cols-6 md:grid-cols-12 gap-2'>
       <div className='col-span-6 md:col-span-5'>
-        <div className='bg-linear-to-br from-white to-gray-100 flex flex-wrap h-96 rounded-[1vw] inset-shadow-xl shadow-xl'>
+        <div className='border-t-6 border-green-600 bg-linear-to-br from-white to-gray-100 flex flex-wrap h-96 rounded-[1vw] inset-shadow-xl shadow-xl'>
           <div className='w-full grid grid-cols-12 grid-rows-7'>
             <div className='col-span-12 row-span-1 font-[750] text-lg text-gray-700 w-full rounded-t-[1vw] align-middle pt-4 pl-7'>Projects per Type</div>
             <div className='col-span-12 row-span-6'>
@@ -92,6 +95,7 @@ export default function ProjectDashboard() {
                     hovertemplate: '<b>Type:</b> %{label} <br><b>Count:</b> %{value}<br><b>Percent: </b>%{percent}<extra></extra>',
                     hole: .6,
                     type: 'pie',
+                    outsidetextfont: {color: 'transparent'},
                     marker: {colors: ['#01ac42', '#FFEB00']}
 
                   },]} 
@@ -109,16 +113,20 @@ export default function ProjectDashboard() {
         </div>
 
           <div className='grid grid-cols-5 gap-x-1'>
-            <div className='bg-white inset-shadow-lg rounded-lg shadow-xl h-37 mt-2 mr-1 pt-4 pl-4 gap- col-span-5 md:col-span-3 overflow-hidden'>
-              <div className='bg-green-500/50 rounded-lg h-12 w-16'></div>
+            <div className='border-l-4 border-green-600 bg-white inset-shadow-lg rounded-lg shadow-xl h-37 mt-2 mr-1 pt-4 pl-4 gap- col-span-5 md:col-span-3 overflow-hidden'>
+              <div className='bg-green-500/70 rounded-lg h-12 w-16 flex items-center justify-center'>
+                  <FontAwesomeIcon className="text-white text-3xl" icon={faMoneyBills} /> 
+              </div>
               <div className='gap-y-0 pt-2'>
-                <p className='text-xl sm:text-base text-right font-[650] pr-4 align-bottom'>₱ {data?.stats?.total_budget?.toLocaleString()}</p>
+                <p className='text-xl sm:text-base text-right font-[650] pr-4 align-bottom'>₱ {Number(data?.stats?.total_budget).toLocaleString()}</p>
                 <p className='text-right text-xs font-medium pr-4 align-top'>Total Approved Project Budget</p>
               </div>
             </div>
             
-            <div className='bg-white inset-shadow-lg rounded-lg shadow-xl h-37 pt-4 pl-4 mt-2 mr-1 col-span-5 md:col-span-2 overflow-hidden'>
-              <div className='bg-green-500/50 rounded-lg h-12 w-16'></div>
+            <div className='border-l-4 border-green-600 bg-white inset-shadow-lg rounded-lg shadow-xl h-37 pt-4 pl-4 mt-2 mr-1 col-span-5 md:col-span-2 overflow-hidden'>
+              <div className='bg-green-500/70 rounded-lg h-12 w-16 flex items-center justify-center'>
+                  <FontAwesomeIcon className="text-white text-3xl" icon={faMoneyBill} />
+              </div>
               <div className='pt-2'>
                 <p className='text-2xl sm:text-base text-right font-[650] pr-4 align-bottom'>₱ {data?.stats?.new_budget?.toLocaleString()}</p>
                 <p className='text-right text-xs font-medium pr-4 align-top'>Total Approved Project Budget</p>
@@ -128,43 +136,68 @@ export default function ProjectDashboard() {
       </div>
       
       <div className='col-span-7'>
-        <div className='bg-white inset-shadow-lg h-66 rounded-[1vw] shadow-xl'>
-          <div className=' bg-green-500/50 text-md font-(family-name: --font-inter) font-[550] w-full h-12 rounded-t-[1vw] align-middle pt-3 pl-4'>Initiated Projects per Year</div>
+        <div className='border-t-6 border-green-600 bg-white inset-shadow-lg h-66 rounded-[1vw] shadow-xl'>
+          <div className='text-md font-(family-name: --font-inter) font-[550] w-full h-12 rounded-t-[1vw] align-middle pt-3 pl-4'>Initiated Projects per Year</div>
           <div className='pr-16'>
             <Plotly 
               data={[
                 {
                   type: 'bar', 
-                  width: 0.4, 
                   x: data?.charts?.year_labels?.map(String), 
                   y: data?.charts?.year_counts,
                   text: data?.charts?.year_counts?.map(String), 
-                  textposition: 'auto', // Automatically puts it inside or above the bar
+                  textposition: 'inside', // Put bar text inside to avoid clashing with the line
                   marker: {color: '#01ac42'},
-                  width: 0.4,
+                  width: 0.5, // Slightly wider for better visibility
+                  name: 'Count (Bar)'
                 },
                 {
-                  x: data?.charts?.year_labels?.map(String),
-                  y: data?.charts?.year_counts,
                   type: 'scatter',
                   mode: 'lines+markers',
-                  marker: {color: 'green'},
-                  text: data?.charts?.year_counts?.map(String), 
-                  textposition: 'auto', // Automatically puts it inside or above the bar
-                  width: 0.4,
-                },]}
-              layout={{height: 190, barcornerradius: 10, plot_bgcolor: 'rgba(0,0,0,0)', paper_bgcolor: 'rgba(0,0,0,0)', 
-                margin: {l: 50, r: 0, b: 20, t: 10, pad: 1
-                }}}
+                  x: data?.charts?.year_labels?.map(String),
+                  y: data?.charts?.year_counts,
+                  line: {color: 'green', width: 3},
+                  marker: {color: 'green', size: 8},
+                  // Removed 'text' here to avoid double-labeling the same points
+                  name: 'Trend'
+                },
+              ]}
+              layout={{
+                height: 220,
+                barcornerradius: 5,
+                barmode: 'stack',
+                plot_bgcolor: 'rgba(0,0,0,0)',
+                paper_bgcolor: 'rgba(0,0,0,0)',
+                margin: { l: 70, r: 40, b: 40, t: 10,},
+                showlegend: true,
+                xaxis: {
+                  linecolor: '#00702B', 
+                  linewidth: 2,
+                  showline: true,
+                  tickcolor: '#00702B',
+                  tickfont: {
+                    color: '#00702B',
+                    size: 11
+                  },
+                  type: 'category'
+                },
+                yaxis: {
+                  showgrid: true,
+                  gridcolor: '#f0f0f0',
+                  rangemode: 'tozero',
+                  // THIS IS THE FIX:
+                  zeroline: false, // Prevents the default grey line at y=0 from overlapping
+                }
+              }}
               useResizeHandler={true}
               style={{width: "100%", height: "100%"}}
-              config = {{displaylogo: false}}
-              />
+              config={{displaylogo: false}}
+            />
             </div>
         </div>
 
-        <div className='bg-white inset-shadow-lg h-67 mt-2 rounded-[1vw] shadow-xl'>
-          <div className='bg-green-500/50 text-md w-full h-12 font-(family-name: --font-inter) font-[550] rounded-t-[1vw] align-middle pt-3 pl-4'>Approved Project Budget per Year</div>
+        <div className='border-t-6 border-green-600 bg-white inset-shadow-lg h-67 mt-2 rounded-[1vw] shadow-xl'>
+          <div className='text-md w-full h-12 font-(family-name: --font-inter) font-[550] rounded-t-[1vw] align-middle pt-3 pl-4'>Approved Project Budget per Year</div>
           <div>
             <Plotly 
               data={[
@@ -203,12 +236,30 @@ export default function ProjectDashboard() {
               ]}
               layout={{
                 height: 220,
+                barcornerradius: 5,
                 barmode: 'stack',
                 plot_bgcolor: 'rgba(0,0,0,0)',
                 paper_bgcolor: 'rgba(0,0,0,0)',
-                margin: {l: 50, r: 50, b: 30, t: 30, pad: 4},
-                // legend: {orientation: 'h', x: 0.02, y: -0.15},
-                barcornerradius: 10,
+                margin: { l: 70, r: 40, b: 40, t: 10,},
+                showlegend: true,
+                xaxis: {
+                  linecolor: '#00702B', 
+                  linewidth: 2,
+                  showline: true,
+                  tickcolor: '#00702B',
+                  tickfont: {
+                    color: '#00702B',
+                    size: 11
+                  },
+                  type: 'category'
+                },
+                yaxis: {
+                  showgrid: true,
+                  gridcolor: '#f0f0f0',
+                  rangemode: 'tozero',
+                  // THIS IS THE FIX:
+                  zeroline: false, // Prevents the default grey line at y=0 from overlapping
+                }
               }}
               useResizeHandler={true}
               style={{width: "100%", height: "100%"}}

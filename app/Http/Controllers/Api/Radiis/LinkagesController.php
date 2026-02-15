@@ -3,32 +3,38 @@
 namespace App\Http\Controllers\Api\Radiis;
 
 use App\Http\Controllers\Controller;
-use App\Models\RDPublication;
+use App\Models\RDLinkages;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
 
-class PublicationController extends Controller
+class LinkagesController extends Controller
 {
     public function index(Request $request)
     {
-        $query = RDPublication::query();
+        $query = RDLinkages::query();
         $grouping = $request->query('group_by', $request->groupby);
 
-        $maxYear = $request->year ?? RDPublication::max('pubyear');
+        $maxYear = $request->year ?? RDLinkages::max('effyear');
         $secondYear = $maxYear - 1;
-        $permMaxYear = RDPublication::max('pubyear');
+        $permMaxYear = RDLinkages::max('effyear');
 
-        $stackedData = RDPublication::select('pubyear', $grouping, DB::raw('count(*) as total'))
-        ->whereBetween('pubyear', [$permMaxYear-6, $permMaxYear])
-        ->groupBy('pubyear', $grouping)
+        $stackedData = RDLinkages::select('effyear', $grouping, DB::raw('count(*) as total'))
+        ->whereBetween('effyear', [$permMaxYear-6, $permMaxYear])
+        ->groupBy('effyear', $grouping)
         ->get();
 
         $filteredData = (clone $query)
-        ->when($request->year, fn($q) => $q->where('pubyear', $request->year))
+        ->when($request->year, fn($q) => $q->where('effyear', $request->year))
         ->get();
         
         //-----------------------------------------------------
+        $per_type = $filteredData
+        ->groupBy('type')
+        ->map(function ($items) {
+        return $items->count(); 
+        });
+
         $per_category = $filteredData
         ->groupBy('category')
         ->map(function ($items) {
@@ -41,6 +47,12 @@ class PublicationController extends Controller
         return $items->count(); 
         });
 
+        $per_status = $filteredData
+        ->groupBy('status')
+        ->map(function ($items) {
+        return $items->count(); 
+        });
+
         $per_unit = $filteredData
         ->groupBy('acct_unit')
         ->map(function ($items) {
@@ -48,41 +60,45 @@ class PublicationController extends Controller
         });
 
         //-----------------------------------------------------
-        $per_year = RDPublication::select('pubyear', DB::raw('count(*) as total'))
-        ->groupBy('pubyear')
-        ->orderBy('pubyear', 'desc')
+        $per_year = RDLinkages::select('effyear', DB::raw('count(*) as total'))
+        ->groupBy('effyear')
+        ->orderBy('effyear', 'desc')
         ->take(7)
         ->get()
         ->reverse();
 
         //-----------------------------------------------------
-        $mxyear_value = RDPublication::where('pubyear', $maxYear)->count();
-        $prevyear_value_test = RDPublication::where('pubyear', $secondYear)->count();
+        $mxyear_value = RDLinkages::where('effyear', $maxYear)->count();
+        $prevyear_value_test = RDLinkages::where('effyear', $secondYear)->count();
         $prevyear_value = ($prevyear_value_test > 0) ? $prevyear_value_test : 0;
 
         $year_perc = ($prevyear_value == 0) ? 0:((($mxyear_value-$prevyear_value)/$prevyear_value) * 100);
         //---------------------------------------------------------
-        $all_year = RDPublication::select('pubyear')
+        $all_year = RDLinkages::select('effyear')
         ->distinct()
-        ->orderBy('pubyear', 'desc')
-        ->pluck('pubyear') 
+        ->orderBy('effyear', 'desc')
+        ->pluck('effyear') 
         ->reverse();
 
         return response()->json([
             'stats' => [
-                'total_pub'   => RDPublication::where('pubyear','<=',$maxYear)->count(),
-                'new_pub'   => $filteredData->where('pubyear', $maxYear)->count(),
-                'max_year' => $filteredData->max('pubyear'),
+                'total_link'   => RDLinkages::where('effyear','<=',$maxYear)->count(),
+                'new_link'   => $filteredData->where('effyear', $maxYear)->count(),
+                'max_year' => $filteredData->max('effyear'),
                 'prev_year' => $secondYear,
                 'all_year' => $all_year,
             ],
             'charts' => [
-                'year_labels' => $per_year->pluck('pubyear')->map(fn($year) => (string)$year), 
+                'year_labels' => $per_year->pluck('effyear')->map(fn($year) => (string)$year), 
                 'year_counts' => $per_year->pluck('total'),
                 'per_category_labels' => $per_category->keys(),
                 'per_category_values' => $per_category->values(),
+                'per_type_labels' => $per_type->keys(),
+                'per_type_values' => $per_type->values(),
                 'per_level_labels' => $per_level->keys(),
                 'per_level_values' => $per_level->values(),
+                'per_status_labels' => $per_status->keys(),
+                'per_status_values' => $per_status->values(),
                 'per_unit_labels' => $per_unit->keys(),
                 'per_unit_values' => $per_unit->values(),
                 'stacked' => $this->formatStacked($stackedData, $grouping, $permMaxYear),
@@ -106,7 +122,7 @@ class PublicationController extends Controller
                     'name' => $name,
                     'counts' => collect($years)->map(function ($year) use ($rawResults, $name, $grouping) {
                         // Find the specific row for this year and category
-                        $match = $rawResults->where('pubyear', $year)
+                        $match = $rawResults->where('effyear', $year)
                                             ->where($grouping, $name)
                                             ->first();
                         return $match ? $match->total : 0;
@@ -114,9 +130,8 @@ class PublicationController extends Controller
                 ];
             });
 
-            // 3. Calculate the "Total" line for the scatter plot
             $totalLine = collect($years)->map(function ($year) use ($rawResults) {
-                return $rawResults->where('pubyear', $year)->sum('total');
+                return $rawResults->where('effyear', $year)->sum('total');
             });
 
             return [
@@ -125,52 +140,4 @@ class PublicationController extends Controller
                 'total_line' => $totalLine
             ];
         }
-
-    // /**
-    //  * Show the form for creating a new resource.
-    //  */
-    // public function create()
-    // {
-    //     //
-    // }
-
-    // /**
-    //  * Store a newly created resource in storage.
-    //  */
-    // public function store(Request $request)
-    // {
-    //     //
-    // }
-
-    // /**
-    //  * Display the specified resource.
-    //  */
-    // public function show(RDPublication $rDPublication)
-    // {
-    //     //
-    // }
-
-    // /**
-    //  * Show the form for editing the specified resource.
-    //  */
-    // public function edit(RDPublication $rDPublication)
-    // {
-    //     //
-    // }
-
-    // /**
-    //  * Update the specified resource in storage.
-    //  */
-    // public function update(Request $request, RDPublication $rDPublication)
-    // {
-    //     //
-    // }
-
-    // /**
-    //  * Remove the specified resource from storage.
-    //  */
-    // public function destroy(RDPublication $rDPublication)
-    // {
-    //     //
-    // }
 }

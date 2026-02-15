@@ -3,12 +3,17 @@ import axiosClient from "../axios-client";
 import Plotly from 'react-plotly.js';
 import MainCard from '../components/MainCard.jsx';
 import SecCard from '../components/SecCard.jsx';
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faCalendarPlus } from "@fortawesome/free-regular-svg-icons";
+import { faBook } from "@fortawesome/free-solid-svg-icons";
+
 
 export default function PublicationDashboard() {
   const [data, setData] = useState([]);
   const [loading, setLoading] = useState(false);
   const [filters, setFilters] = useState({
-    year: ''
+    year: '',
+    groupby: 'category',
 });
 
   useEffect(() => {
@@ -30,6 +35,25 @@ export default function PublicationDashboard() {
       setLoading(false);
     })
   }
+
+  const barTraces = data?.charts?.stacked?.series?.map((s, index) => ({
+    x: data.charts.stacked.labels.map(String),
+    y: s.counts,
+    name: s.name,
+    type: 'bar',
+    width: 0.4,
+    marker: { color: ['#01ac42', '#F2EA00', '#4E98FF', '#D84CFF', '#FF6284'][index % 5] }
+})) || [];
+
+// Accessing the total line
+const totalLine = {
+    x: data?.charts?.stacked?.labels?.map(String),
+    y: data?.charts?.stacked?.total_line,
+    name: 'Total',
+    type: 'scatter',
+    mode: 'lines+markers',
+    marker: { color: '#00702B' }
+};
 
   return (
     <div>
@@ -60,75 +84,87 @@ export default function PublicationDashboard() {
         </div>
         </div>
         <div className="px-6 pt-4">
-            <div className="grid grid-cols-3 sm:grid-cols-12 gap-3 mb-2">
+            <div className="grid grid-cols-4 md:grid-cols-12 gap-3 mb-2">
                 <div className="col-span-4">       
                         <div>
-                            <MainCard number={data?.stats?.total_pub} title="Total Publications" />
+                            <MainCard icon={<FontAwesomeIcon icon={faBook} className="text-green-600 text-3xl" />} number={data?.stats?.total_pub} title="Total Publications" />
                         </div>
                         <div className="mt-3">
-                            <SecCard number={data?.stats?.new_pub} percent={<span className={data?.percentages?.year_percent > 0 ? 'text-green-600' : 'text-red-600'}>
+                            <SecCard icon={<FontAwesomeIcon icon={faCalendarPlus} className="text-white text-3xl" />} number={data?.stats?.new_pub} percent={<span className={data?.percentages?.year_percent > 0 ? 'text-green-600' : 'text-red-600'}>
                             {data?.percentages?.year_percent > 0 ? '▲' : '▼'} {data?.percentages?.year_percent}%
-                            </span>} title={`New Projects in ${data?.stats?.max_year}`}/>
+                            </span>} title={`New Publications in ${data?.stats?.max_year}`}/>
                         </div>
                 </div>
-                <div className="col-span-8">
-                    <div className="bg-white rounded-[1vw] inset-shadow-xl shadow-xl h-75">
-                        {/* <Plotly 
-                        data={[
-                            {
-                            x: data?.charts?.year_labels?.map(String),
-                            y: data?.charts?.res_sums,
-                            name: 'Research',
-                            type: 'bar',
-                            marker: {color: '#01ac42'},
-                            width: 0.4,
-                            },
-                            {
-                            x: data?.charts?.budget_labels?.map(String),
-                            y: data?.charts?.dev_sums,
-                            name: 'Development',
-                            type: 'bar',
-                            marker: {color: '#F2EA00'},
-                            width: 0.4,
-                            },
-                            {
-                            x: data?.charts?.budget_labels?.map(String),
-                            y: data?.charts?.resdev_sums,
-                            name: 'Research and Development',
-                            type: 'bar',
-                            marker: {color: '#4E98FF'},
-                            width: 0.4,
-                            },
-                            {
-                            x: data?.charts?.budget_labels?.map(String),
-                            y: data?.charts?.budget_totals,
-                            type: 'scatter',
-                            mode: 'lines+markers',
-                            marker: {color: '#00702B'},
-                            name: 'Total'
-                            },
-                        ]}
-                        layout={{
-                            height: 220,
-                            barmode: 'stack',
-                            plot_bgcolor: 'rgba(0,0,0,0)',
-                            paper_bgcolor: 'rgba(0,0,0,0)',
-                            margin: {l: 50, r: 50, b: 30, t: 30, pad: 4},
-                            // legend: {orientation: 'h', x: 0.02, y: -0.15},
-                            barcornerradius: 10,
-                        }}
-                        useResizeHandler={true}
-                        style={{width: "100%", height: "100%"}}
-                        config = {{displaylogo: false}}
-                        /> */}
+                <div className="col-span-4 md:col-span-8">
+                    <div className="border-l-6 border-green-600 bg-white rounded-[1vw] inset-shadow-xl shadow-xl h-75">
+                        
+                            <div className="font-[650] text-lg text-gray-700 pl-6 pt-4">
+                                Publications per Year
+                            </div>
+                            <div className="flex justify-end pr-5">
+                                <select 
+                                    className="right-0 "
+                                    value={filters.groupby} 
+                                    onChange={(e) => setFilters({ ...filters, groupby: e.target.value })}
+                                    >
+                                        <option value="category">Per Category</option>
+                                        <option value="level">Per Level</option>
+                                </select>
+                            </div>
+                            <div>
+                        <Plotly 
+                            data={[
+                                ...barTraces, 
+                                totalLine
+                            ]}
+                            layout={{
+                                height: 220,
+                                barcornerradius: 5,
+                                barmode: 'stack',
+                                plot_bgcolor: 'rgba(0,0,0,0)',
+                                paper_bgcolor: 'rgba(0,0,0,0)',
+                                margin: { l: 60, r: 70, b: 20, t: 10},
+                                showlegend: true,
+                                xaxis: {
+                                linecolor: '#00702B', 
+                                linewidth: 2,
+                                showline: true,
+                                tickcolor: '#00702B',
+                                tickfont: {
+                                    color: '#00702B',
+                                    size: 11
+                                },
+                                type: 'category'
+                                },
+                                yaxis: {
+                                showgrid: true,
+                                gridcolor: '#f0f0f0',
+                                rangemode: 'tozero',
+                                zeroline: false,
+                                },
+                                legend: {
+                                    x: 1,           // Snaps to the right edge of the plot
+                                    xanchor: 'right', 
+                                    y: 1.2,         // Moves it slightly above the plot line
+                                    orientation: 'h', // Horizontal layout saves a lot of "right-side" space
+                                    bgcolor: 'rgba(255, 255, 255, 0.5)',
+                                    font: { size: 7 },
+                                }
+                            }}
+                            useResizeHandler={true}
+                            style={{ width: "100%", height: "100%" }}
+                            config={{ displaylogo: false, responsive: true }}
+                        />
+                        </div>
+                    
                     </div>
                 </div>
             </div>
 
             <div className="grid grid-cols-4 sm:grid-cols-12 gap-3">
-                <div className="col-span-4 h-96 bg-white rounded-[1vw] inset-shadow-xl shadow-xl">
+                <div className="col-span-4 h-96 border-t-6 border-green-600 bg-white rounded-[1vw] inset-shadow-xl shadow-xl">
                     <div className='grid grid-rows-7 h-full'>
-                        <div className='row-span-1 font-[750] text-lg text-gray-700 w-full rounded-t-[1vw] align-middle pt-4 pl-7'>Projects per Category</div>
+                        <div className='row-span-1 font-[750] text-lg text-gray-700 w-full rounded-t-[1vw] align-middle pt-4 pl-7'>Publications per Category</div>
                         <div className='row-span-6 h-full w-full'>
                         <Plotly 
                             data={[{
@@ -137,6 +173,7 @@ export default function PublicationDashboard() {
                                 hovertemplate: '<b>Ctegory:</b> %{label} <br><b>Count:</b> %{value}<br><b>Percent: </b>%{percent}<extra></extra>',
                                 hole: .6,
                                 type: 'pie',
+                                outsidetextfont: {color: 'transparent'},
                                 marker: {colors: ['#01ac42', '#FFEB00']}
                                 },]} 
                             layout={{
@@ -152,9 +189,9 @@ export default function PublicationDashboard() {
                         </div>
                     </div>
                 </div>
-                <div className="col-span-4 h-96 bg-white rounded-[1vw] inset-shadow-xl shadow-xl">
+                <div className="col-span-4 h-96 border-t-6 border-green-600 bg-white rounded-[1vw] inset-shadow-xl shadow-xl">
                     <div className='grid grid-rows-7 h-full'>
-                        <div className='row-span-1 font-[750] text-lg text-gray-700 w-full rounded-t-[1vw] align-middle pt-4 pl-7'>Projects per Level</div>
+                        <div className='row-span-1 font-[750] text-lg text-gray-700 w-full rounded-t-[1vw] align-middle pt-4 pl-7'>Publications per Level</div>
                         <div className='row-span-6 h-full w-full'>
                         <Plotly 
                             data={[{
@@ -163,6 +200,7 @@ export default function PublicationDashboard() {
                                 hovertemplate: '<b>Level:</b> %{label} <br><b>Count:</b> %{value}<br><b>Percent: </b>%{percent}<extra></extra>',
                                 hole: .6,
                                 type: 'pie',
+                                outsidetextfont: {color: 'transparent'},
                                 marker: {colors: ['#01ac42', '#FFEB00']}
                                 },]} 
                             layout={{
@@ -178,9 +216,9 @@ export default function PublicationDashboard() {
                         </div>
                     </div>
                 </div>
-                <div className="col-span-4 h-96 bg-white rounded-[1vw] inset-shadow-xl shadow-xl mb-5">
+                <div className="col-span-4 h-96 border-t-6 border-green-600 bg-white rounded-[1vw] inset-shadow-xl shadow-xl mb-5">
                     <div className='grid grid-rows-7 h-full'>
-                        <div className='row-span-1 font-[750] text-lg text-gray-700 w-full rounded-t-[1vw] align-middle pt-4 pl-7'>Projects per Unit</div>
+                        <div className='row-span-1 font-[750] text-lg text-gray-700 w-full rounded-t-[1vw] align-middle pt-4 pl-7'>Publications per Unit</div>
                         <div className='row-span-6 h-full w-full'>
                         <Plotly 
                             data={[{
@@ -189,6 +227,7 @@ export default function PublicationDashboard() {
                                 hovertemplate: '<b>Unit:</b> %{label} <br><b>Count:</b> %{value}<br><b>Percent: </b>%{percent}<extra></extra>',
                                 hole: .6,
                                 type: 'pie',
+                                outsidetextfont: {color: 'transparent'},
                                 marker: {colors: ['#01ac42', '#FFEB00']}
                                 },]} 
                             layout={{

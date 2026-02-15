@@ -4,7 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 
-class RDStudy extends Model
+class RDAward extends Model
 {
-    protected $table = 'rdstudies';
+    protected $table = 'rdawards';
 }

@@ -39,14 +39,14 @@ class ProjectController extends Controller
         $per_year = RDProject::select('syear', DB::raw('count(*) as total'))
         ->groupBy('syear')
         ->orderBy('syear', 'desc')
-        ->take(5)
+        ->take(7)
         ->get()
         ->reverse();
         //-----------------------------------------------------
         $per_budget = RDProject::select('syear', DB::raw('sum(budget) as total'))
         ->groupBy('syear')
         ->orderBy('syear', 'desc')
-        ->take(5)
+        ->take(7)
         ->get()
         ->reverse();
 
@@ -54,12 +54,12 @@ class ProjectController extends Controller
         ->where('type', 'Research')
         ->groupBy('syear')
         ->orderBy('syear', 'desc')
-        ->take(5)
+        ->take(7)
         ->get()
         ->reverse()
         ->keyBy('syear');
 
-        $budget_research = collect(range($permMaxYear - 4, $permMaxYear))
+        $budget_research = collect(range($permMaxYear - 6, $permMaxYear))
             ->map(function ($year) use ($budget_res) {
             return [
                 'syear' => $year,
@@ -77,7 +77,7 @@ class ProjectController extends Controller
         ->reverse()
         ->keyBy('syear');
 
-        $budget_develop = collect(range($permMaxYear - 4, $permMaxYear))
+        $budget_develop = collect(range($permMaxYear - 6, $permMaxYear))
             ->map(function ($year) use ($budget_dev) {
             return [
                 'syear' => $year,
@@ -90,12 +90,12 @@ class ProjectController extends Controller
         ->where('type', 'Research and Development')
         ->groupBy('syear')
         ->orderBy('syear', 'desc')
-        ->take(5)
+        ->take(7)
         ->get()
         ->reverse()
         ->keyBy('syear');
 
-        $budget_resdevelop = collect(range($permMaxYear - 4, $permMaxYear))
+        $budget_resdevelop = collect(range($permMaxYear - 6, $permMaxYear))
             ->map(function ($year) use ($budget_resdev) {
             return [
                 'syear' => $year,
@@ -130,7 +130,7 @@ class ProjectController extends Controller
                 'completed_projects' => $filteredData->where('status', 'Completed')->count(),
                 'ongoing_projects'   => $filteredData->where('status', 'Ongoing')->count(),
                 'new_projects'   => $filteredData->where('syear', $maxYear)->count(),
-                'total_budget' => $filteredData->where('syear','<', $maxYear)->sum('budget'),
+                'total_budget' => RDProject::where('syear','<=', $maxYear)->sum('budget'),
                 'new_budget' => $filteredData->where('syear', $maxYear)->sum('budget'),
                 'max_year' => $filteredData->max('syear'),
                 'prev_year' => $secondYear,

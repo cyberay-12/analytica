@@ -1,4 +1,4 @@
-import {Link} from 'react-router-dom';
+import {Link, useNavigate} from 'react-router-dom';
 import {useRef, useState} from 'react';   
 import axiosClient from '../axios-client.js'; 
 import {useStateContext} from '../contexts/ContextProvider'; 
@@ -9,7 +9,9 @@ export default function SignUp() {
   const passwordRef = useRef();
   const passwordConfirmRef = useRef();
   const [errors, setErrors] = useState(null);
-  const {setUser, setToken} = useStateContext();
+  const navigate = useNavigate();
+
+  // const {setUser, setToken} = useStateContext();
 
   const onSubmit = (e) => {
     e.preventDefault();
@@ -21,11 +23,10 @@ export default function SignUp() {
       password_confirmation: passwordConfirmRef.current.value,
     }
     
-    console.log(payload);
+    setErrors(null);
     axiosClient.post('/signup', payload)
       .then(({data}) => {
-        setUser(data.user)
-        setToken(data.token);
+        navigate('/login');
       })
       .catch(err => {
         const response = err.response;

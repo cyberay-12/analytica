@@ -3,32 +3,38 @@
 namespace App\Http\Controllers\Api\Radiis;
 
 use App\Http\Controllers\Controller;
-use App\Models\RDPublication;
+use App\Models\RDAward;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
 
-class PublicationController extends Controller
+class AwardController extends Controller
 {
     public function index(Request $request)
     {
-        $query = RDPublication::query();
+        $query = RDAward::query();
         $grouping = $request->query('group_by', $request->groupby);
 
-        $maxYear = $request->year ?? RDPublication::max('pubyear');
+        $maxYear = $request->year ?? RDAward::max('awdyear');
         $secondYear = $maxYear - 1;
-        $permMaxYear = RDPublication::max('pubyear');
+        $permMaxYear = RDAward::max('awdyear');
 
-        $stackedData = RDPublication::select('pubyear', $grouping, DB::raw('count(*) as total'))
-        ->whereBetween('pubyear', [$permMaxYear-6, $permMaxYear])
-        ->groupBy('pubyear', $grouping)
+        $stackedData = RDAward::select('awdyear', $grouping, DB::raw('count(*) as total'))
+        ->whereBetween('awdyear', [$permMaxYear-6, $permMaxYear])
+        ->groupBy('awdyear', $grouping)
         ->get();
 
         $filteredData = (clone $query)
-        ->when($request->year, fn($q) => $q->where('pubyear', $request->year))
+        ->when($request->year, fn($q) => $q->where('awdyear', $request->year))
         ->get();
         
         //-----------------------------------------------------
+        $per_mode = $filteredData
+        ->groupBy('mode')
+        ->map(function ($items) {
+        return $items->count(); 
+        });
+
         $per_category = $filteredData
         ->groupBy('category')
         ->map(function ($items) {
@@ -48,39 +54,41 @@ class PublicationController extends Controller
         });
 
         //-----------------------------------------------------
-        $per_year = RDPublication::select('pubyear', DB::raw('count(*) as total'))
-        ->groupBy('pubyear')
-        ->orderBy('pubyear', 'desc')
+        $per_year = RDAward::select('awdyear', DB::raw('count(*) as total'))
+        ->groupBy('awdyear')
+        ->orderBy('awdyear', 'desc')
         ->take(7)
         ->get()
         ->reverse();
 
         //-----------------------------------------------------
-        $mxyear_value = RDPublication::where('pubyear', $maxYear)->count();
-        $prevyear_value_test = RDPublication::where('pubyear', $secondYear)->count();
+        $mxyear_value = RDAward::where('awdyear', $maxYear)->count();
+        $prevyear_value_test = RDAward::where('awdyear', $secondYear)->count();
         $prevyear_value = ($prevyear_value_test > 0) ? $prevyear_value_test : 0;
 
         $year_perc = ($prevyear_value == 0) ? 0:((($mxyear_value-$prevyear_value)/$prevyear_value) * 100);
         //---------------------------------------------------------
-        $all_year = RDPublication::select('pubyear')
+        $all_year = RDAward::select('awdyear')
         ->distinct()
-        ->orderBy('pubyear', 'desc')
-        ->pluck('pubyear') 
+        ->orderBy('awdyear', 'desc')
+        ->pluck('awdyear') 
         ->reverse();
 
         return response()->json([
             'stats' => [
-                'total_pub'   => RDPublication::where('pubyear','<=',$maxYear)->count(),
-                'new_pub'   => $filteredData->where('pubyear', $maxYear)->count(),
-                'max_year' => $filteredData->max('pubyear'),
+                'total_award'   => RDAward::where('awdyear','<=',$maxYear)->count(),
+                'new_award'   => $filteredData->where('awdyear', $maxYear)->count(),
+                'max_year' => $filteredData->max('awdyear'),
                 'prev_year' => $secondYear,
                 'all_year' => $all_year,
             ],
             'charts' => [
-                'year_labels' => $per_year->pluck('pubyear')->map(fn($year) => (string)$year), 
+                'year_labels' => $per_year->pluck('awdyear')->map(fn($year) => (string)$year), 
                 'year_counts' => $per_year->pluck('total'),
                 'per_category_labels' => $per_category->keys(),
                 'per_category_values' => $per_category->values(),
+                'per_mode_labels' => $per_mode->keys(),
+                'per_mode_values' => $per_mode->values(),
                 'per_level_labels' => $per_level->keys(),
                 'per_level_values' => $per_level->values(),
                 'per_unit_labels' => $per_unit->keys(),
@@ -106,7 +114,7 @@ class PublicationController extends Controller
                     'name' => $name,
                     'counts' => collect($years)->map(function ($year) use ($rawResults, $name, $grouping) {
                         // Find the specific row for this year and category
-                        $match = $rawResults->where('pubyear', $year)
+                        $match = $rawResults->where('awdyear', $year)
                                             ->where($grouping, $name)
                                             ->first();
                         return $match ? $match->total : 0;
@@ -114,9 +122,8 @@ class PublicationController extends Controller
                 ];
             });
 
-            // 3. Calculate the "Total" line for the scatter plot
             $totalLine = collect($years)->map(function ($year) use ($rawResults) {
-                return $rawResults->where('pubyear', $year)->sum('total');
+                return $rawResults->where('awdyear', $year)->sum('total');
             });
 
             return [
@@ -125,52 +132,4 @@ class PublicationController extends Controller
                 'total_line' => $totalLine
             ];
         }
-
-    // /**
-    //  * Show the form for creating a new resource.
-    //  */
-    // public function create()
-    // {
-    //     //
-    // }
-
-    // /**
-    //  * Store a newly created resource in storage.
-    //  */
-    // public function store(Request $request)
-    // {
-    //     //
-    // }
-
-    // /**
-    //  * Display the specified resource.
-    //  */
-    // public function show(RDPublication $rDPublication)
-    // {
-    //     //
-    // }
-
-    // /**
-    //  * Show the form for editing the specified resource.
-    //  */
-    // public function edit(RDPublication $rDPublication)
-    // {
-    //     //
-    // }
-
-    // /**
-    //  * Update the specified resource in storage.
-    //  */
-    // public function update(Request $request, RDPublication $rDPublication)
-    // {
-    //     //
-    // }
-
-    // /**
-    //  * Remove the specified resource from storage.
-    //  */
-    // public function destroy(RDPublication $rDPublication)
-    // {
-    //     //
-    // }
 }

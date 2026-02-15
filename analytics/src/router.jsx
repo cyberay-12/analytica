@@ -11,6 +11,10 @@ import ProjectDashboard from './views/ProjectDashboard.jsx';
 import UserForm from './views/UserForm.jsx';
 import StudiesDashboard from './views/StudiesDashboard.jsx';
 import PublicationDashboard from './views/PublicationDashboard.jsx';
+import PresentationDashboard from './views/PresentationDashboard.jsx';
+import IPRightDashboard from './views/IPRightsDashboard.jsx';
+import AwardDashboard from './views/AwardDashboard.jsx';
+import LinkageDashboard from './views/LinkageDashboard.jsx';
 
 const router = createBrowserRouter([
   {
@@ -36,6 +40,22 @@ const router = createBrowserRouter([
         {
           path: "/rdspublication",
           element: <PublicationDashboard />,
+        },
+        {
+          path: "/rdspresentation",
+          element: <PresentationDashboard />,
+        },
+        {
+          path: "/rdsiprights",
+          element: <IPRightDashboard />,
+        },
+        {
+          path: "/rdsaward",
+          element: <AwardDashboard />,
+        },
+        {
+          path: "/rdslinkage",
+          element: <LinkageDashboard />,
         },
         {
             path: "/users",
